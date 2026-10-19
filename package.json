@@ -1,0 +1,30 @@
+{
+  "name": "minty-asset",
+  "version": "1.0.0",
+  "description": "Zero-Cost Personal Money Manager with Google Account Real-Time Sync & Versioned Backup Vault",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "test": "node --test",
+    "test:e2e": "playwright test"
+  },
+  "keywords": [
+    "money-manager",
+    "personal-finance",
+    "google-drive-sync",
+    "local-first",
+    "zero-cost",
+    "indexeddb"
+  ],
+  "author": "Minty Asset Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^8.3.4"
+  }
+}

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minty Asset — Zero-Cost Money Manager</title>
+  <meta name="description" content="Privacy-first, zero-cost personal finance and money manager web app with real-time Google Drive sync and automated versioned backups.">
+  
+  <!-- Modern Typography (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+  <!-- Application Design Tokens & Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <!-- Google Identity Services (GIS) for Zero-Cost OAuth 2.0 Real-Time Sync -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <!-- =========================================================================
+       Application Header
+       ========================================================================= -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <span>Minty Asset</span>
+          <span class="brand-badge">Zero Cost</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Real-Time Sync Indicator Pill -->
+        <button id="syncIndicatorPill" class="sync-indicator-pill" title="Configure Google Drive Real-Time Sync">
+          <span id="syncStatusDot" class="sync-dot"></span>
+          <span id="syncStatusText">Local (Offline)</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" title="Switch light/dark theme">
+          ☀️ Light
+        </button>
+
+        <!-- Single Primary CTA Per Context (Von Restorff / 8pt grid) -->
+        <button id="openAddTxModalBtn" class="btn btn-primary" title="Record an income or expense">
+          <span>+ Add Transaction</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       Navigation Tabs
+       ========================================================================= -->
+  <nav class="nav-tabs" aria-label="Main Navigation">
+    <button class="nav-tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="nav-tab-btn" data-tab="transactions">Transactions</button>
+    <button class="nav-tab-btn" data-tab="accounts">Accounts</button>
+    <button class="nav-tab-btn" data-tab="budgets">Budgets & Goals</button>
+    <button class="nav-tab-btn" data-tab="backups">Backup & Sync Vault</button>
+    <button class="nav-tab-btn" data-tab="settings">Settings</button>
+  </nav>
+
+  <!-- =========================================================================
+       Main Content Views
+       ========================================================================= -->
+  <main class="main-content">
+
+    <!-- -----------------------------------------------------------------------
+         Tab 1: Financial Dashboard
+         ----------------------------------------------------------------------- -->
+    <section id="tab-dashboard" class="tab-pane active" aria-labelledby="Dashboard View">
+      <!-- Metric Cards Grid -->
+      <div class="metrics-grid">
+        <div class="metric-card hero-networth">
+          <div class="metric-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Total Net Worth (Assets - Liabilities)
+          </div>
+          <div id="metricNetWorth" class="metric-value">$0.00</div>
+          <div class="metric-subtext">
+            <span class="metric-pill positive">● Live Ledger</span>
+            <span>Real-time calculation across all connected assets</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Monthly Inflow (Income)</div>
+          <div id="metricIncome" class="metric-value" style="color: var(--mint-primary);">$0.00</div>
+          <div class="metric-subtext">Current calendar month</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Monthly Outflow (Expenses)</div>
+          <div id="metricExpense" class="metric-value" style="color: var(--color-expense);">$0.00</div>
+          <div class="metric-subtext">Current calendar month</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Net Savings Rate</div>
+          <div id="metricSavings" class="metric-value">$0.00 (0%)</div>
+          <div class="metric-subtext">Retained cash flow</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-grid">
+        <!-- Cash Flow Bar Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+              Cash Flow Velocity (Income vs Expense)
+            </div>
+            <div style="display: flex; gap: 12px; font-size: 11px;">
+              <span style="display: flex; align-items: center; gap: 4px;"><span class="legend-color-dot" style="background-color: var(--mint-primary);"></span> Income</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span class="legend-color-dot" style="background-color: var(--color-expense);"></span> Expense</span>
+            </div>
+          </div>
+          <div id="cashFlowChartContainer" class="chart-container"></div>
+        </div>
+
+        <!-- Expense Donut Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10z"></path></svg>
+              Expense Breakdown
+            </div>
+          </div>
+          <div id="expenseDonutContainer" class="chart-container"></div>
+          <div id="expenseDonutLegend" class="legend-list"></div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions Mini Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Activity</div>
+          <button class="btn btn-ghost" style="padding: 4px 10px; font-size: 12px;" onclick="window.mintyUI.switchTab('transactions')">View All Ledger →</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th style="text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="recentTransactionsList"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- -----------------------------------------------------------------------
+         Tab 2: Transactions Ledger
+         ----------------------------------------------------------------------- -->
+    <section id="tab-transactions" class="tab-pane" aria-labelledby="Transactions Ledger">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Transactions</div>
+          <button class="btn btn-primary" onclick="document.getElementById('addTxModal').classList.add('open')">+ New Entry</button>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="table-filter-bar">
+          <div class="search-input-wrapper">
+            <input id="txSearchInput" type="text" class="input-control" placeholder="Search by description, merchant, or notes...">
+          </div>
+          <div style="min-width: 200px;">
+            <select id="txCategoryFilterSelect" class="input-control">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Full Ledger Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Account</th>
+                <th style="text-align: right;">Amount</th>
+                <th style="text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- -----------------------------------------------------------------------
+         Tab 3: Accounts Hub
+         ----------------------------------------------------------------------- -->
+    <section id="tab-accounts" class="tab-pane" aria-labelledby="Accounts Hub">
+      <div class="card-header">
+        <div class="card-title">Connected Accounts & Wallets</div>
+      </div>
+      <div id="accountsListContainer" class="metrics-grid"></div>
+    </section>
+
+    <!-- -----------------------------------------------------------------------
+         Tab 4: Budgets & 50/30/20 Planner
+         ----------------------------------------------------------------------- -->
+    <section id="tab-budgets" class="tab-pane" aria-labelledby="Budgets & Goals">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Monthly Category Budget Limits
+          </div>
+          <span style="font-size: 12px; color: var(--text-secondary);">Real-time burn tracker</span>
+        </div>
+        <div id="budgetEnvelopesContainer" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      </div>
+    </section>
+
+    <!-- -----------------------------------------------------------------------
+         Tab 5: Versioned Backup & Sync Vault
+         ----------------------------------------------------------------------- -->
+    <section id="tab-backups" class="tab-pane" aria-labelledby="Backup & Sync Vault">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              Dual-Layer Versioned Backup Vault
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+              Every snapshot preserves your complete financial state. Restore back to any earlier point in time with 1 click.
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="createSnapshotBtn" class="btn btn-primary">
+              <span>+ Create Snapshot Now</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+          <button id="downloadBackupBtn" class="btn btn-secondary">
+            ⬇️ Download Backup (.json)
+          </button>
+          <label class="btn btn-secondary" style="margin: 0; cursor: pointer;">
+            ⬆️ Upload & Restore File
+            <input type="file" id="importBackupFileInput" accept=".json" style="display: none;">
+          </label>
+        </div>
+
+        <!-- Snapshots List -->
+        <div style="margin-top: 16px;">
+          <h3 style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">Saved Version History</h3>
+          <div id="snapshotsListContainer" class="backup-vault-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- -----------------------------------------------------------------------
+         Tab 6: Settings & Privacy
+         ----------------------------------------------------------------------- -->
+    <section id="tab-settings" class="tab-pane" aria-labelledby="Settings">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Google Account Real-Time Sync Setup</div>
+          <span class="badge badge-income">100% Free Forever</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px;">
+          Minty Asset connects directly with your personal Google Drive storage using the private AppData folder. It requires <strong>zero servers</strong> and costs <strong>$0.00</strong>.
+        </p>
+        <div class="form-group" style="max-width: 600px; margin-top: 12px;">
+          <label class="form-label">Google OAuth 2.0 Client ID:</label>
+          <input type="text" id="googleClientIdInput" class="input-control" placeholder="123456789-abc.apps.googleusercontent.com">
+          <span style="font-size: 11px; color: var(--text-muted);">
+            Create a free Web Client ID in the <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: var(--mint-primary);">Google Cloud Console</a> with your origin added to Authorized Javascript Origins.
+          </span>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 8px;">
+          <button id="connectGoogleBtn" class="btn btn-primary">Connect Google Account</button>
+          <button id="manualSyncNowBtn" class="btn btn-secondary">Sync Now</button>
+        </div>
+      </div>
+
+      <!-- Data Sovereignty / GDPR / Right to be Forgotten -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Data Sovereignty & Privacy Controls (GDPR / DPDP)</div>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px;">
+          Your financial data belongs exclusively to you. All transactions and balances are stored in your local browser and your personal Google account. No telemetry or analytics are collected.
+        </p>
+        <div style="display: flex; gap: 12px; margin-top: 12px;">
+          <button class="btn btn-secondary" onclick="window.mintyBackupVault.downloadBackupFile()">
+            Export Full Ledger (JSON)
+          </button>
+          <button class="btn btn-danger" onclick="if(confirm('Erase all local transactions and accounts?')) { indexedDB.deleteDatabase('MintyAssetDB'); location.reload(); }">
+            Erase Local Database
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       Modal: Add / Record Transaction
+       ========================================================================= -->
+  <div id="addTxModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitle" class="modal-title">Record Transaction</h2>
+        <button id="closeAddTxModalBtn" class="modal-close-btn" aria-label="Close dialog">✕</button>
+      </div>
+
+      <form id="addTxForm" style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="txAmountInput">Amount ($)</label>
+            <input type="number" id="txAmountInput" class="input-control" step="0.01" min="0.01" placeholder="45.00" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="txTypeSelect">Flow Type</label>
+            <select id="txTypeSelect" class="input-control">
+              <option value="expense">Expense (Outflow)</option>
+              <option value="income">Income (Inflow)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="txCategorySelect">Category</label>
+            <select id="txCategorySelect" class="input-control"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="txAccountSelect">Account / Card</label>
+            <select id="txAccountSelect" class="input-control"></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="txDateInput">Date</label>
+          <input type="date" id="txDateInput" class="input-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="txNoteInput">Description / Payee Note</label>
+          <input type="text" id="txNoteInput" class="input-control" placeholder="e.g. Trader Joe's Groceries, Shell Gasoline...">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="txRecurringCheckbox" style="width: 18px; height: 18px; accent-color: var(--mint-primary);">
+          <label for="txRecurringCheckbox" style="font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+            Mark as recurring monthly bill / subscription
+          </label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('addTxModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       Modal: Google Sync Status & Setup
+       ========================================================================= -->
+  <div id="syncModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="syncModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="syncModalTitle" class="modal-title">Google Account Real-Time Sync</h2>
+        <button id="closeSyncModalBtn" class="modal-close-btn" aria-label="Close dialog">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="padding: 16px; border-radius: var(--radius-md); background-color: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Status</div>
+          <div id="syncModalStatusText" style="font-size: 16px; font-weight: 600; color: var(--mint-primary); margin-top: 4px;">
+            Local-First Mode (100% Free)
+          </div>
+          <div id="googleUserProfileBox" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);"></div>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-secondary);">
+          Sync keeps your financial ledger identical across your phone, tablet, and PC in real time. It uses your personal Google Drive and never touches any commercial database.
+        </p>
+
+        <button class="btn btn-primary" onclick="document.getElementById('syncModal').classList.remove('open'); window.mintyUI.switchTab('settings');">
+          Open Sync Settings →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic Modules -->
+  <script type="module" src="js/db.js"></script>
+  <script type="module" src="js/crypto.js"></script>
+  <script type="module" src="js/sync.js"></script>
+  <script type="module" src="js/backup.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

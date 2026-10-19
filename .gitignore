@@ -1,0 +1,58 @@
+# Dependency directories
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# Environment and sensitive secrets
+.env
+.env.local
+.env.*.local
+*.env
+*.pem
+*.key
+*.cert
+*.pfx
+*.p12
+id_rsa
+id_ed25519
+
+# Build outputs and caches
+dist/
+build/
+out/
+.next/
+.cache/
+.turbo/
+*.tsbuildinfo
+
+# OS & Editor generated files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test and coverage artifacts
+coverage/
+.nyc_output/
+cypress/videos/
+cypress/screenshots/
+playwright-report/
+test-results/
+
+# Temporary / Scratch directories
+tmp/
+temp/
+scratch/
