@@ -7,6 +7,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { AppProvider, useApp } from "@/lib/context/app-context";
+import { PeriodFilterBar } from "@/components/filters/period-filter";
 import {
   LayoutDashboard,
   ReceiptText,
@@ -16,7 +18,6 @@ import {
   LogOut,
   Menu,
   X,
-  User as UserIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -52,14 +53,14 @@ const navItems = [
   },
 ];
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { profile } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
-  const [userName, setUserName] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     async function loadUser() {
@@ -69,7 +70,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       if (user) {
         setUserEmail(user.email || null);
-        setUserName(user.user_metadata?.display_name || user.email?.split("@")[0] || "User");
       }
     }
     loadUser();
@@ -97,7 +97,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-lg text-foreground tracking-tight">Minty</span>
               <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                INR
+                {profile.currency_code}
               </span>
             </div>
           </Link>
@@ -115,7 +115,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
+                    ? "bg-primary text-primary-foreground shadow-sm font-semibold"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 )}
               >
@@ -130,11 +130,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="p-4 border-t border-border/70 space-y-3">
           <div className="flex items-center gap-3 px-2">
             <div className="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-xs uppercase">
-              {userName?.charAt(0) || "U"}
+              {profile.display_name?.charAt(0) || "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate">{userName}</p>
-              <p className="text-[11px] text-muted-foreground truncate">{userEmail}</p>
+              <p className="text-xs font-semibold text-foreground truncate">
+                {profile.display_name || "Personal Ledger"}
+              </p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                {userEmail || "Local Session"}
+              </p>
             </div>
           </div>
 
@@ -155,28 +159,44 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Body Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile Header */}
-        <header className="h-16 md:hidden flex items-center justify-between px-4 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-30">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Image
-              src="/brand/logo-icon.svg"
-              alt="Minty Logo"
-              width={28}
-              height={28}
-            />
-            <span className="font-bold text-base text-foreground tracking-tight">Minty</span>
-          </Link>
+        {/* Top Header Bar */}
+        <header className="h-16 flex items-center justify-between px-4 sm:px-6 border-b border-border bg-card/70 backdrop-blur-md sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <div className="md:hidden flex items-center gap-2">
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <Image
+                  src="/brand/logo-icon.svg"
+                  alt="Minty Logo"
+                  width={28}
+                  height={28}
+                />
+                <span className="font-bold text-base text-foreground tracking-tight">Minty</span>
+              </Link>
+            </div>
 
-          <div className="flex items-center gap-2">
+            {/* Global Period Filter Component */}
+            <PeriodFilterBar />
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary text-[11px] font-semibold text-muted-foreground border border-border">
+              <span>{profile.currency_symbol}</span>
+              <span>·</span>
+              <span>{profile.number_format === "lakh_crore" ? "Lakh/Crore" : "Million"}</span>
+            </div>
+
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            </div>
           </div>
         </header>
 
@@ -222,7 +242,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         )}
 
-        {/* Main Page Content */}
+        {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-20 md:pb-8">
           {children}
         </main>
@@ -251,5 +271,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
       </div>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  return (
+    <AppProvider>
+      <DashboardShell>{children}</DashboardShell>
+    </AppProvider>
   );
 }
