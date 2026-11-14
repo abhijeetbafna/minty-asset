@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none" width="200" height="48">
+  <defs>
+    <linearGradient id="mintyGradFull" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon Mark -->
+  <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#mintyGradFull)"/>
+  <line x1="16" y1="16" x2="32" y2="16" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round"/>
+  <line x1="16" y1="21.5" x2="28" y2="21.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M22 16V26C22 26 23.5 28 27.5 28C31 28 32.5 25.5 32.5 22.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M21 26.5L31.5 34.5" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="16" r="2" fill="#A7F3D0"/>
+
+  <!-- Wordmark -->
+  <text x="56" y="31" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="700" fill="currentColor" letter-spacing="-0.5">Minty</text>
+  <rect x="122" y="16" width="36" height="17" rx="4" fill="#0F766E" fill-opacity="0.12"/>
+  <text x="127" y="28" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#0F766E" letter-spacing="0.5">INDIA</text>
+</svg>

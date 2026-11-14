@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" width="48" height="48">
+  <defs>
+    <linearGradient id="mintyGrad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F766E" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Background Rounded Squircle -->
+  <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#mintyGrad)" filter="url(#subtleShadow)"/>
+  
+  <!-- Stylized Rupee + Growth Trajectory Symbol -->
+  <!-- Top Rupee Horizontal Bar -->
+  <line x1="16" y1="16" x2="32" y2="16" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round"/>
+  <!-- Second Rupee Horizontal Bar -->
+  <line x1="16" y1="21.5" x2="28" y2="21.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round"/>
+  <!-- Rupee Central Stem and Curved Bowl -->
+  <path d="M22 16V26C22 26 23.5 28 27.5 28C31 28 32.5 25.5 32.5 22.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dynamic Growth Stroke / Leg -->
+  <path d="M21 26.5L31.5 34.5" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  <!-- Modern Accent Node -->
+  <circle cx="32" cy="16" r="2" fill="#A7F3D0"/>
+</svg>
